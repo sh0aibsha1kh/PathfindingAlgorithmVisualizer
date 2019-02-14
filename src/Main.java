@@ -3,15 +3,12 @@ import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.StrokeType;
 import javafx.stage.Stage;
 
 import java.util.Random;
 
 
 public class Main extends Application {
-
-    private Node[][] nodes = new Node[25][50];
 
     public static void main(String[] args) {
         launch(args);
@@ -21,13 +18,12 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         GridPane gridPane = new GridPane();
 
-        createGrid(gridPane, 20, 20, 25, 50);
+        Grid grid = new Grid(25, 50, 20, 20);
 
-        setStartingCell(nodes);
-        setGoalCell(nodes);
+        attachGrid(gridPane, grid);
 
-        Node startingCell = getStartingCell(nodes);
-        Node goalCell = getGoalCell(nodes);
+        grid.createStartingCell();
+        grid.createGoalCell();
 
         Scene scene = new Scene(gridPane, 1000, 500);
 
@@ -38,54 +34,15 @@ public class Main extends Application {
 
     }
 
-    private Node getStartingCell(Node[][] nodes) {
-        for (Node[] node : nodes) {
-            for (Node n : node) {
-                if (n.getFill().equals(Color.rgb(155, 39, 175))) {
-                    return n;
-                }
-            }
-        }
-        return null;
-    }
-
-    private Node getGoalCell(Node[][] nodes) {
-        for (Node[] node : nodes) {
-            for (Node n : node) {
-                if (n.getFill().equals(Color.rgb(33, 150, 243))) {
-                    return n;
-                }
-            }
-        }
-        return null;
-    }
-
-
-    private void setStartingCell(Node[][] cells) {
-        Random r = new Random();
-        cells[r.nextInt(cells.length)][r.nextInt(cells[0].length)].setFill(Color.rgb(155, 39, 175));
-    }
-
-    private void setGoalCell(Node[][] cells) {
-        Random r = new Random();
-        Rectangle potentialGoalCell = cells[r.nextInt(cells.length)][r.nextInt(cells[0].length)];
-        while (potentialGoalCell.getFill().equals(Color.rgb(155, 39, 175))) {
-            potentialGoalCell = cells[r.nextInt(cells.length)][r.nextInt(cells[0].length)];
-        }
-        potentialGoalCell.setFill(Color.rgb(33, 150, 243));
-    }
-
-    private void createGrid(GridPane gridPane, int cellWidth, int cellHeight, int numberOfRows, int numberOfColumns) {
-
-        for (int row = 0; row < numberOfRows; row++) {
-            for (int col = 0; col < numberOfColumns; col++) {
-                Node node = new Node(row, col, cellWidth, cellHeight);
-                nodes[row][col] = node;
+    private void attachGrid(GridPane gridPane, Grid grid) {
+        Node[][] nodes = grid.getNodes();
+        for (int row = 0; row < nodes.length; row++) {
+            for (int col = 0; col < nodes[0].length; col++) {
+                Node node = nodes[row][col];
                 GridPane.setConstraints(node, col, row);
                 gridPane.getChildren().addAll(node);
             }
         }
-
     }
 }
 
