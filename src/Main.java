@@ -6,10 +6,12 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 import javafx.stage.Stage;
 
+import java.util.Random;
+
 
 public class Main extends Application {
 
-    private Rectangle[][] cells = new Rectangle[30][45];
+    private Rectangle[][] cells = new Rectangle[25][50];
 
     public static void main(String[] args) {
         launch(args);
@@ -19,29 +21,31 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         GridPane gridPane = new GridPane();
 
-        createGrid(gridPane, 20, 20, 30, 45);
+        createGrid(gridPane, 20, 20, 25, 50);
 
-        Scene scene = new Scene(gridPane, 900, 600);
+        setStartingCell(cells);
+        setGoalCell(cells);
+
+        Scene scene = new Scene(gridPane, 1000, 500);
 
         primaryStage.setTitle("Grid");
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        for (int i = 0; i < cells.length; i += 1) {
-            for (int j = 0; j < cells[0].length; j += 1) {
-                if (i % 2 == 0) {
-                    if (j % 2 == 1) {
-                        cells[i][j].setFill(Color.BLACK);
-                    }
-                } else {
-                    if (j % 2 == 0) {
-                        cells[i][j].setFill(Color.BLACK);
-                    }
-                }
-            }
+    }
 
+    private void setStartingCell(Rectangle[][] cells) {
+        Random r = new Random();
+        cells[r.nextInt(cells.length)][r.nextInt(cells[0].length)].setFill(Color.rgb(155, 39, 175));
+    }
+
+    private void setGoalCell(Rectangle[][] cells) {
+        Random r = new Random();
+        Rectangle potentialGoalCell = cells[r.nextInt(cells.length)][r.nextInt(cells[0].length)];
+        while(potentialGoalCell.getFill() == Color.rgb(155, 39, 175)) {
+            potentialGoalCell = cells[r.nextInt(cells.length)][r.nextInt(cells[0].length)];
         }
-
+        potentialGoalCell.setFill(Color.rgb(33, 150, 243));
     }
 
     private void createGrid(GridPane gridPane, int cellWidth, int cellHeight, int numberOfRows, int numberOfColumns) {
@@ -62,7 +66,7 @@ public class Main extends Application {
         rectangle.setFill(Color.TRANSPARENT);
         rectangle.setStroke(Color.BLACK);
         rectangle.setStrokeType(StrokeType.INSIDE);
-        rectangle.setStrokeWidth(0.25);
+        rectangle.setStrokeWidth(0.1);
         return rectangle;
     }
 
