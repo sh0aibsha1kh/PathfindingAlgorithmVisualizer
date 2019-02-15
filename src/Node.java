@@ -2,14 +2,16 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 
+import java.util.Objects;
+
 class Node extends Rectangle {
 
-    private int i, j;
+    private int x, y;
 
-    Node(int i, int j, int width, int height) {
+    Node(int x, int y, int width, int height) {
         super(width, height);
-        this.i = i;
-        this.j = j;
+        this.x = x;
+        this.y = y;
         this.setFill(Color.TRANSPARENT);
         this.setStroke(Color.BLACK);
         this.setStrokeType(StrokeType.INSIDE);
@@ -17,15 +19,24 @@ class Node extends Rectangle {
     }
 
     int getXCoordinate() {
-        return i;
+        return x;
     }
 
     int getYCoordinate() {
-        return j;
+        return y;
     }
 
-    void setCoordinates(int i, int j) {
-        this.i = i;
-        this.j = j;
+    void setCoordinates(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Node node = (Node) o;
+        return x == node.x &&
+                y == node.y;
     }
 }
