@@ -49,13 +49,25 @@ class Grid {
                 if (Math.random() <= 0.25
                         && !(nodes[row][col].equals(getStartingNode())
                         || nodes[row][col].equals(getGoalNode())
-                        || nodes[row][col].getFill().equals(Color.BLACK))) {
+                        || nodes[row][col].getFill().equals(Color.GREY))) {
 
-                    nodes[row][col].setFill(Color.BLACK);
+                    nodes[row][col].setFill(Color.GREY);
 
                 }
             }
         }
+    }
+
+    int getNumberOfObstacles() {
+        int obstacles = 0;
+        for (int row = 0; row < numberOfRows; row++) {
+            for (int col = 0; col < numberOfColumns; col++) {
+                if (nodes[row][col].getFill().equals(Color.BLACK)) {
+                    obstacles += 1;
+                }
+            }
+        }
+        return obstacles;
     }
 
     Node getStartingNode() {
@@ -80,22 +92,47 @@ class Grid {
         return null;
     }
 
-    ArrayList<Node> getNeighbours(Node node) {
+    ArrayList<Node> getNeighbours(Node node, boolean allowDiagonal) {
         ArrayList<Node> neighbours = new ArrayList<>();
         int x = node.getXCoordinate();
         int y = node.getYCoordinate();
-        if (x - 1 >= 0 && !nodes[x - 1][y].getFill().equals(Color.BLACK)) {
-            neighbours.add(nodes[x - 1][y]);
+        Node up = x - 1 >= 0 ? nodes[x - 1][y] : null;
+        Node down = x + 1 < nodes.length ? nodes[x + 1][y] : null;
+        Node left = y - 1 >= 0 ? nodes[x][y - 1] : null;
+        Node right = y + 1 < nodes[0].length ? nodes[x][y + 1] : null;
+        Node upRight = x - 1 >= 0 && y + 1 < nodes[0].length ? nodes[x - 1][y + 1] : null;
+        Node upLeft = x - 1 >= 0 && y - 1 >= 0 ? nodes[x - 1][y - 1] : null;
+        Node downRight = x + 1 < nodes.length && y + 1 < nodes[0].length ? nodes[x + 1][y + 1] : null;
+        Node downLeft = x + 1 < nodes.length && y - 1 >= 0 ? nodes[x + 1][y - 1] : null;
+
+        if (up != null && !isBlocked(up)) {
+            neighbours.add(up);
         }
-        if (x + 1 < nodes.length && !nodes[x + 1][y].getFill().equals(Color.BLACK)) {
-            neighbours.add(nodes[x + 1][y]);
+        if (upRight != null && !isBlocked(upRight) && allowDiagonal) {
+            neighbours.add(upRight);
         }
-        if (y - 1 >= 0 && !nodes[x][y - 1].getFill().equals(Color.BLACK)) {
-            neighbours.add(nodes[x][y - 1]);
+        if (right != null && !isBlocked(right)) {
+            neighbours.add(right);
         }
-        if (y + 1 < nodes[0].length && !nodes[x][y + 1].getFill().equals(Color.BLACK)) {
-            neighbours.add(nodes[x][y + 1]);
+        if (downRight != null && !isBlocked(downRight) && allowDiagonal) {
+            neighbours.add(downRight);
+        }
+        if (down != null && !isBlocked(down)) {
+            neighbours.add(down);
+        }
+        if (downLeft != null && !isBlocked(downLeft) && allowDiagonal) {
+            neighbours.add(downLeft);
+        }
+        if (left != null && !isBlocked(left)) {
+            neighbours.add(left);
+        }
+        if (upLeft != null && !isBlocked(upLeft) && allowDiagonal) {
+            neighbours.add(upLeft);
         }
         return neighbours;
+    }
+
+    private boolean isBlocked(Node n) {
+        return n.getFill().equals(Color.GREY);
     }
 }
