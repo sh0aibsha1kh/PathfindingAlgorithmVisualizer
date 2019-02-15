@@ -1,13 +1,18 @@
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.util.*;
 
 
 public class Main extends Application {
+
+    private List<Node> visited = new ArrayList<>();
 
     public static void main(String[] args) {
         launch(args);
@@ -25,8 +30,8 @@ public class Main extends Application {
         grid.createGoalNode();
         grid.createObstacleNodes();
 
-//        breadthFirstSearch(grid);
-        depthFirstSearch(grid);
+        breadthFirstSearch(grid);
+        colourPath(visited, grid);
 
         Scene scene = new Scene(gridPane, 1000, 500);
 
@@ -42,22 +47,44 @@ public class Main extends Application {
         Node goalNode = grid.getGoalNode();
         seen.add(startingNode);
         queue.add(startingNode);
+        visited.add(startingNode);
+
         while (queue.size() != 0) {
-            Node currentNode = queue.poll();
-            currentNode.setFill(Color.YELLOW);
+
+            Node currentNode = queue.remove();
+
             if (currentNode.equals(goalNode)) {
-                currentNode.setFill(Color.GREEN);
-                startingNode.setFill(Color.PURPLE);
                 return;
             }
-
-            for (Node n : grid.getNeighbours(currentNode)) {
+            for (Node n : grid.getNeighbours(currentNode, false)) {
                 if (!seen.contains(n)) {
-                    seen.add(n);
                     queue.add(n);
+                    seen.add(n);
+                    visited.add(n);
                 }
             }
         }
+
+    }
+
+    private void colourPath(List<Node> visited, Grid grid) {
+        Timeline t = new Timeline();
+        for (Node n : visited) {
+            KeyFrame kf = new KeyFrame(Duration.millis(25 * (visited.indexOf(n) + 1)), event -> {
+                if (n.equals(grid.getGoalNode())) {
+                    n.setFill(Color.GREEN);
+                    t.stop();
+                    return;
+                }
+                if (!n.equals(grid.getStartingNode())) {
+                    n.setFill(Color.ORANGE);
+                }
+            });
+
+            t.getKeyFrames().add(kf);
+        }
+        t.play();
+
     }
 
     private void depthFirstSearch(Grid grid) {
@@ -67,18 +94,18 @@ public class Main extends Application {
         Node goalNode = grid.getGoalNode();
         seen.add(startingNode);
         stack.push(startingNode);
+        visited.add(startingNode);
+
         while (!stack.empty()) {
+
             Node currentNode = stack.pop();
-            currentNode.setFill(Color.RED);
+            seen.add(currentNode);
+            visited.add(currentNode);
             if (currentNode.equals(goalNode)) {
-                currentNode.setFill(Color.GREEN);
-                startingNode.setFill(Color.PURPLE);
                 return;
             }
-
-            for (Node n : grid.getNeighbours(currentNode)) {
+            for (Node n : grid.getNeighbours(currentNode, true)) {
                 if (!seen.contains(n)) {
-                    seen.add(n);
                     stack.push(n);
                 }
             }
