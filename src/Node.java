@@ -2,7 +2,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 
-import java.util.Objects;
 
 class Node extends Rectangle {
 
