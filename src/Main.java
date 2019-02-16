@@ -11,7 +11,7 @@ public class Main extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         GridPane gridPane = new GridPane();
 
         Grid grid = new Grid(25, 50, 20, 20);
@@ -23,8 +23,8 @@ public class Main extends Application {
         grid.createGoalNode();
         grid.createObstacleNodes();
 
-//        grid.breadthFirstSearch();
-        grid.depthFirstSearch();
+        grid.breadthFirstSearch();
+//        grid.depthFirstSearch();
         grid.colourPath();
 
         Scene scene = new Scene(gridPane, 1000, 500);
