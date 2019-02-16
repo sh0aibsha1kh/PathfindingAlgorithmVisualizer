@@ -11,7 +11,6 @@ class Grid {
     private Node[][] nodes;
     private int numberOfRows, numberOfColumns, nodeHeight, nodeWidth;
     private List<Node> toBeColoured = new ArrayList<>();
-    private int DURATION = 25;
 
     Grid(int numberOfRows, int numberOfColumns, int nodeWidth, int nodeHeight) {
         this.numberOfRows = numberOfRows;
@@ -51,12 +50,12 @@ class Grid {
     void createObstacleNodes() {
         for (int row = 0; row < numberOfRows; row++) {
             for (int col = 0; col < numberOfColumns; col++) {
+                Node currentNode = nodes[row][col];
                 if (Math.random() <= 0.25
-                        && !(nodes[row][col].equals(getStartingNode())
-                        || nodes[row][col].equals(getGoalNode())
-                        || nodes[row][col].getFill().equals(Color.GREY))) {
+                        && !(currentNode.equals(getStartingNode()) || currentNode.equals(getGoalNode())
+                        || isBlocked(currentNode))) {
 
-                    nodes[row][col].setFill(Color.GREY);
+                    currentNode.setFill(Color.GREY);
 
                 }
             }
@@ -137,11 +136,7 @@ class Grid {
         return neighbours;
     }
 
-    private boolean isBlocked(Node n) {
-        return n.getFill().equals(Color.GREY);
-    }
-
-    public void breadthFirstSearch() {
+    void breadthFirstSearch() {
         Set<Node> seen = new HashSet<>();
         Queue<Node> queue = new LinkedList<>();
         Node startingNode = getStartingNode();
@@ -167,7 +162,7 @@ class Grid {
         }
     }
 
-    public void depthFirstSearch() {
+    void depthFirstSearch() {
         Set<Node> seen = new HashSet<>();
         Stack<Node> stack = new Stack<>();
         Node startingNode = getStartingNode();
@@ -192,9 +187,10 @@ class Grid {
         }
     }
 
-    public void colourPath() {
+    void colourPath() {
         Timeline t = new Timeline();
         for (Node n : toBeColoured) {
+            int DURATION = 10;
             KeyFrame kf = new KeyFrame(Duration.millis(DURATION * (toBeColoured.indexOf(n) + 1)), event -> {
                 if (n.equals(getGoalNode())) {
                     n.setFill(Color.GREEN);
@@ -211,4 +207,28 @@ class Grid {
         t.play();
     }
 
+    double calculateDistance(Node currentNode, Node goalNode, boolean allowDiagonal) {
+        if (allowDiagonal) {
+            return euclideanDistance(currentNode, goalNode);
+        } else {
+            return manhattanDistance(currentNode, goalNode);
+        }
+    }
+
+    /* ========== HELPERS ========== */
+
+    private boolean isBlocked(Node n) {
+        return n.getFill().equals(Color.GREY);
+    }
+
+
+    private double euclideanDistance(Node currentNode, Node goalNode) {
+        return Math.sqrt(Math.pow(goalNode.getXCoordinate() - currentNode.getXCoordinate(), 2)
+                + Math.pow(goalNode.getYCoordinate() - currentNode.getYCoordinate(), 2));
+    }
+
+    private double manhattanDistance(Node currentNode, Node goalNode) {
+        return Math.abs(goalNode.getXCoordinate() - currentNode.getXCoordinate())
+                + Math.abs(goalNode.getYCoordinate() - currentNode.getYCoordinate());
+    }
 }
