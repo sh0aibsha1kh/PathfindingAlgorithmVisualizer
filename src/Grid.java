@@ -1,12 +1,17 @@
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.scene.paint.Color;
+import javafx.util.Duration;
 
-import java.util.ArrayList;
-import java.util.Random;
+
+import java.util.*;
 
 class Grid {
 
     private Node[][] nodes;
     private int numberOfRows, numberOfColumns, nodeHeight, nodeWidth;
+    private List<Node> toBeColoured = new ArrayList<>();
+    private int DURATION = 25;
 
     Grid(int numberOfRows, int numberOfColumns, int nodeWidth, int nodeHeight) {
         this.numberOfRows = numberOfRows;
@@ -70,7 +75,7 @@ class Grid {
         return obstacles;
     }
 
-    Node getStartingNode() {
+    private Node getStartingNode() {
         for (Node[] node : nodes) {
             for (Node n : node) {
                 if (n.getFill().equals(Color.rgb(155, 39, 175))) {
@@ -81,7 +86,7 @@ class Grid {
         return null;
     }
 
-    Node getGoalNode() {
+    private Node getGoalNode() {
         for (Node[] node : nodes) {
             for (Node n : node) {
                 if (n.getFill().equals(Color.rgb(33, 150, 243))) {
@@ -92,7 +97,7 @@ class Grid {
         return null;
     }
 
-    ArrayList<Node> getNeighbours(Node node, boolean allowDiagonal) {
+    private ArrayList<Node> getNeighbours(Node node, boolean allowDiagonal) {
         ArrayList<Node> neighbours = new ArrayList<>();
         int x = node.getXCoordinate();
         int y = node.getYCoordinate();
@@ -135,4 +140,75 @@ class Grid {
     private boolean isBlocked(Node n) {
         return n.getFill().equals(Color.GREY);
     }
+
+    public void breadthFirstSearch() {
+        Set<Node> seen = new HashSet<>();
+        Queue<Node> queue = new LinkedList<>();
+        Node startingNode = getStartingNode();
+        Node goalNode = getGoalNode();
+        seen.add(startingNode);
+        queue.add(startingNode);
+        toBeColoured.add(startingNode);
+
+        while (queue.size() != 0) {
+
+            Node currentNode = queue.remove();
+
+            if (currentNode.equals(goalNode)) {
+                return;
+            }
+            for (Node n : getNeighbours(currentNode, false)) {
+                if (!seen.contains(n)) {
+                    queue.add(n);
+                    seen.add(n);
+                    toBeColoured.add(n);
+                }
+            }
+        }
+    }
+
+    public void depthFirstSearch() {
+        Set<Node> seen = new HashSet<>();
+        Stack<Node> stack = new Stack<>();
+        Node startingNode = getStartingNode();
+        Node goalNode = getGoalNode();
+        seen.add(startingNode);
+        stack.push(startingNode);
+        toBeColoured.add(startingNode);
+
+        while (!stack.empty()) {
+
+            Node currentNode = stack.pop();
+            seen.add(currentNode);
+            toBeColoured.add(currentNode);
+            if (currentNode.equals(goalNode)) {
+                return;
+            }
+            for (Node n : getNeighbours(currentNode, true)) {
+                if (!seen.contains(n)) {
+                    stack.push(n);
+                }
+            }
+        }
+    }
+
+    public void colourPath() {
+        Timeline t = new Timeline();
+        for (Node n : toBeColoured) {
+            KeyFrame kf = new KeyFrame(Duration.millis(DURATION * (toBeColoured.indexOf(n) + 1)), event -> {
+                if (n.equals(getGoalNode())) {
+                    n.setFill(Color.GREEN);
+                    t.stop();
+                    return;
+                }
+                if (!n.equals(getStartingNode())) {
+                    n.setFill(Color.ORANGE);
+                }
+            });
+
+            t.getKeyFrames().add(kf);
+        }
+        t.play();
+    }
+
 }
