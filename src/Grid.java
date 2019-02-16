@@ -9,8 +9,10 @@ import java.util.*;
 class Grid {
 
     private Node[][] nodes;
+    private Node startingNode, goalNode;
     private int numberOfRows, numberOfColumns, nodeHeight, nodeWidth;
     private List<Node> toBeColoured = new ArrayList<>();
+    private double[][] heuristicValues;
 
     Grid(int numberOfRows, int numberOfColumns, int nodeWidth, int nodeHeight) {
         this.numberOfRows = numberOfRows;
@@ -18,8 +20,19 @@ class Grid {
         this.nodeWidth = nodeWidth;
         this.nodeHeight = nodeHeight;
         this.nodes = new Node[numberOfRows][numberOfColumns];
+        this.heuristicValues = new double[numberOfRows][numberOfColumns];
 
+        createGrid();
 
+        this.startingNode = createStartingNode();
+        this.goalNode = createGoalNode();
+    }
+
+    Node[][] getNodes() {
+        return nodes;
+    }
+
+    private void createGrid() {
         for (int row = 0; row < numberOfRows; row++) {
             for (int col = 0; col < numberOfColumns; col++) {
                 Node node = new Node(row, col, nodeWidth, nodeHeight);
@@ -29,22 +42,21 @@ class Grid {
         }
     }
 
-    Node[][] getNodes() {
-        return nodes;
+    Node createStartingNode() {
+        Random r = new Random();
+        Node startingNode = nodes[r.nextInt(nodes.length)][r.nextInt(nodes[0].length)];
+        startingNode.setFill(Color.rgb(155, 39, 175));
+        return startingNode;
     }
 
-    void createStartingNode() {
+    Node createGoalNode() {
         Random r = new Random();
-        nodes[r.nextInt(nodes.length)][r.nextInt(nodes[0].length)].setFill(Color.rgb(155, 39, 175));
-    }
-
-    void createGoalNode() {
-        Random r = new Random();
-        Node potentialGoalNode = nodes[r.nextInt(nodes.length)][r.nextInt(nodes[0].length)];
-        while (potentialGoalNode.getFill().equals(Color.rgb(155, 39, 175))) {
-            potentialGoalNode = nodes[r.nextInt(nodes.length)][r.nextInt(nodes[0].length)];
+        Node goalNode = nodes[r.nextInt(nodes.length)][r.nextInt(nodes[0].length)];
+        while (goalNode.getFill().equals(Color.rgb(155, 39, 175))) {
+            goalNode = nodes[r.nextInt(nodes.length)][r.nextInt(nodes[0].length)];
         }
-        potentialGoalNode.setFill(Color.rgb(33, 150, 243));
+        goalNode.setFill(Color.rgb(33, 150, 243));
+        return goalNode;
     }
 
     void createObstacleNodes() {
@@ -139,8 +151,6 @@ class Grid {
     void breadthFirstSearch() {
         Set<Node> seen = new HashSet<>();
         Queue<Node> queue = new LinkedList<>();
-        Node startingNode = getStartingNode();
-        Node goalNode = getGoalNode();
         seen.add(startingNode);
         queue.add(startingNode);
         toBeColoured.add(startingNode);
@@ -165,8 +175,6 @@ class Grid {
     void depthFirstSearch() {
         Set<Node> seen = new HashSet<>();
         Stack<Node> stack = new Stack<>();
-        Node startingNode = getStartingNode();
-        Node goalNode = getGoalNode();
         seen.add(startingNode);
         stack.push(startingNode);
         toBeColoured.add(startingNode);
@@ -176,10 +184,14 @@ class Grid {
             Node currentNode = stack.pop();
             seen.add(currentNode);
             toBeColoured.add(currentNode);
+            List<Node> neighbours = getNeighbours(currentNode, true);
+
             if (currentNode.equals(goalNode)) {
                 return;
             }
-            for (Node n : getNeighbours(currentNode, true)) {
+
+            for (int i = neighbours.size() - 1; i >= 0; i--) {
+                Node n = getNeighbours(currentNode, true).get(i);
                 if (!seen.contains(n)) {
                     stack.push(n);
                 }
@@ -187,10 +199,45 @@ class Grid {
         }
     }
 
+    void aStarSearch(boolean allowDiagonal) {
+        createHeuristicValues(allowDiagonal);
+        Comparator<Node> comparator = (Node n1, Node n2) -> {
+            if (n1.getH() < n2.getH()) return -1;
+            else if (n1.getH() > n2.getH()) return 1;
+            return 0;
+        };
+        startingNode.setH(heuristicValues[startingNode.getXCoordinate()][startingNode.getYCoordinate()]);
+        Map<Node, Double> seen = new HashMap<>();
+        PriorityQueue<Node> priorityQueue = new PriorityQueue<>(comparator);
+        seen.put(startingNode, startingNode.getH());
+        priorityQueue.add(startingNode);
+        toBeColoured.add(startingNode);
+
+        while (!priorityQueue.isEmpty()) {
+
+            Node currentNode = priorityQueue.remove();
+
+            if (currentNode.equals(goalNode)){
+                return;
+            }
+            for (Node n : getNeighbours(currentNode, allowDiagonal)) {
+                n.setH(heuristicValues[n.getXCoordinate()][n.getYCoordinate()]);
+                if(!seen.containsKey(n) || n.getH() < seen.get(n)) {
+                    priorityQueue.add(n);
+                    seen.put(n, n.getH());
+                    System.out.println(heuristicValues[n.getXCoordinate()][n.getYCoordinate()]);
+                    toBeColoured.add(n);
+                }
+            }
+        }
+
+
+    }
+
     void colourPath() {
         Timeline t = new Timeline();
         for (Node n : toBeColoured) {
-            int DURATION = 10;
+            int DURATION = 1000;
             KeyFrame kf = new KeyFrame(Duration.millis(DURATION * (toBeColoured.indexOf(n) + 1)), event -> {
                 if (n.equals(getGoalNode())) {
                     n.setFill(Color.GREEN);
@@ -207,7 +254,12 @@ class Grid {
         t.play();
     }
 
-    double calculateDistance(Node currentNode, Node goalNode, boolean allowDiagonal) {
+    double cost(Node startingNode, Node currentNode) {
+        return 0;
+    }
+
+
+    double heuristic(Node currentNode, Node goalNode, boolean allowDiagonal) {
         if (allowDiagonal) {
             return euclideanDistance(currentNode, goalNode);
         } else {
@@ -221,6 +273,20 @@ class Grid {
         return n.getFill().equals(Color.GREY);
     }
 
+    private void createHeuristicValues(boolean allowDiagonal) {
+        for (int row = 0; row < numberOfRows; row++) {
+            for (int col = 0; col < numberOfColumns; col++) {
+                Node currentNode = nodes[row][col];
+                if (currentNode.equals(startingNode)) {
+                    heuristicValues[row][col] = heuristic(startingNode, goalNode, allowDiagonal);
+                } else if (currentNode.equals(goalNode)) {
+                    heuristicValues[row][col] = 0;
+                } else {
+                    heuristicValues[row][col] = heuristic(currentNode, goalNode, allowDiagonal);
+                }
+            }
+        }
+    }
 
     private double euclideanDistance(Node currentNode, Node goalNode) {
         return Math.sqrt(Math.pow(goalNode.getXCoordinate() - currentNode.getXCoordinate(), 2)
@@ -231,4 +297,6 @@ class Grid {
         return Math.abs(goalNode.getXCoordinate() - currentNode.getXCoordinate())
                 + Math.abs(goalNode.getYCoordinate() - currentNode.getYCoordinate());
     }
+
+
 }

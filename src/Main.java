@@ -19,12 +19,13 @@ public class Main extends Application {
 
         attachGrid(gridPane, grid);
 
-        grid.createStartingNode();
-        grid.createGoalNode();
-        grid.createObstacleNodes();
+//        grid.createStartingNode();
+//        grid.createGoalNode();
+//        grid.createObstacleNodes();
 
-        grid.breadthFirstSearch();
+//        grid.breadthFirstSearch();
 //        grid.depthFirstSearch();
+        grid.aStarSearch(false);
         grid.colourPath();
 
         Scene scene = new Scene(gridPane, 1000, 500);
