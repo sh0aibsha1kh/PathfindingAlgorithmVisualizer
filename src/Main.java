@@ -14,18 +14,12 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
         GridPane gridPane = new GridPane();
 
-        Grid grid = new Grid(25, 50, 20, 20);
-
+        Grid grid = new Grid(25, 50, 20, 20, false);
 
         attachGrid(gridPane, grid);
+        grid.createObstacleNodes();
 
-//        grid.createStartingNode();
-//        grid.createGoalNode();
-//        grid.createObstacleNodes();
-
-        grid.breadthFirstSearch();
-//        grid.depthFirstSearch();
-//        grid.aStarSearch(false);
+        grid.aStarSearch();
         grid.colourPath();
 
         Scene scene = new Scene(gridPane, 1000, 500);
