@@ -23,9 +23,9 @@ public class Main extends Application {
 //        grid.createGoalNode();
 //        grid.createObstacleNodes();
 
-//        grid.breadthFirstSearch();
+        grid.breadthFirstSearch();
 //        grid.depthFirstSearch();
-        grid.aStarSearch(false);
+//        grid.aStarSearch(false);
         grid.colourPath();
 
         Scene scene = new Scene(gridPane, 1000, 500);

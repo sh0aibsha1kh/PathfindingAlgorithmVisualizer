@@ -108,8 +108,12 @@ class Grid {
         return null;
     }
 
+    /*
+    This returns an Arraylist of Nodes (nextState, action, cost)
+     */
     private ArrayList<Node> getNeighbours(Node node, boolean allowDiagonal) {
         ArrayList<Node> neighbours = new ArrayList<>();
+        ArrayList<Node> directions = new ArrayList<>();
         int x = node.getXCoordinate();
         int y = node.getYCoordinate();
         Node up = x - 1 >= 0 ? nodes[x - 1][y] : null;
@@ -120,30 +124,26 @@ class Grid {
         Node upLeft = x - 1 >= 0 && y - 1 >= 0 ? nodes[x - 1][y - 1] : null;
         Node downRight = x + 1 < nodes.length && y + 1 < nodes[0].length ? nodes[x + 1][y + 1] : null;
         Node downLeft = x + 1 < nodes.length && y - 1 >= 0 ? nodes[x + 1][y - 1] : null;
+        directions.add(up);
+        if (allowDiagonal) directions.add(upRight);
+        directions.add(right);
+        if (allowDiagonal) directions.add(downRight);
+        directions.add(down);
+        if (allowDiagonal) directions.add(downLeft);
+        directions.add(left);
+        if (allowDiagonal) directions.add(upLeft);
 
-        if (up != null && !isBlocked(up)) {
-            neighbours.add(up);
-        }
-        if (upRight != null && !isBlocked(upRight) && allowDiagonal) {
-            neighbours.add(upRight);
-        }
-        if (right != null && !isBlocked(right)) {
-            neighbours.add(right);
-        }
-        if (downRight != null && !isBlocked(downRight) && allowDiagonal) {
-            neighbours.add(downRight);
-        }
-        if (down != null && !isBlocked(down)) {
-            neighbours.add(down);
-        }
-        if (downLeft != null && !isBlocked(downLeft) && allowDiagonal) {
-            neighbours.add(downLeft);
-        }
-        if (left != null && !isBlocked(left)) {
-            neighbours.add(left);
-        }
-        if (upLeft != null && !isBlocked(upLeft) && allowDiagonal) {
-            neighbours.add(upLeft);
+        for (Node d : directions) {
+            if (d != null && !isBlocked(d)) {
+                if (d.equals(up) || d.equals(right) || d.equals(down) || d.equals(left)) {
+                    if (d.getG() == null) d.setG(1.0);
+                    else d.setG(d.getG() + 1.0);
+                } else {
+                    if (d.getG() == null) d.setG(Math.sqrt(2));
+                    else d.setG(d.getG() + Math.sqrt(2));
+                }
+                neighbours.add(d);
+            }
         }
         return neighbours;
     }
@@ -153,7 +153,6 @@ class Grid {
         Queue<Node> queue = new LinkedList<>();
         seen.add(startingNode);
         queue.add(startingNode);
-        toBeColoured.add(startingNode);
 
         while (queue.size() != 0) {
 
@@ -162,7 +161,7 @@ class Grid {
             if (currentNode.equals(goalNode)) {
                 return;
             }
-            for (Node n : getNeighbours(currentNode, false)) {
+            for (Node n : getNeighbours(currentNode, true)) {
                 if (!seen.contains(n)) {
                     queue.add(n);
                     seen.add(n);
@@ -177,7 +176,6 @@ class Grid {
         Stack<Node> stack = new Stack<>();
         seen.add(startingNode);
         stack.push(startingNode);
-        toBeColoured.add(startingNode);
 
         while (!stack.empty()) {
 
@@ -199,16 +197,44 @@ class Grid {
         }
     }
 
+//    pq = util.PriorityQueue()
+//
+//    start_state = (problem.getStartState(), [])
+//
+//    seen = {start_state[0]: 0}
+//
+//    pq.push(start_state, heuristic(start_state[0], problem))
+//
+//            while not pq.isEmpty():
+//
+//    current_state = pq.pop()
+//
+//            if problem.getCostOfActions(current_state[1]) <= seen[current_state[0]]:
+//
+//            if problem.isGoalState(current_state[0]):
+//            return current_state[1]
+//
+//            for successor in problem.getSuccessors(current_state[0]):
+//
+//    list_of_actions = current_state[1] + [successor[1]]
+//
+//    new_cost = problem.getCostOfActions(list_of_actions) + heuristic(successor[0], problem)
+//
+//                if successor[0] not in seen or new_cost < seen[successor[0]]:
+//            pq.push((successor[0], list_of_actions), new_cost)
+//    seen[successor[0]] = new_cost
+//
+//    return []
+
     void aStarSearch(boolean allowDiagonal) {
         createHeuristicValues(allowDiagonal);
-        Comparator<Node> comparator = (Node n1, Node n2) -> {
+        startingNode.setH(heuristicValues[startingNode.getXCoordinate()][startingNode.getYCoordinate()]);
+        Map<Node, Double> seen = new HashMap<>();
+        PriorityQueue<Node> priorityQueue = new PriorityQueue<>((Node n1, Node n2) -> {
             if (n1.getH() < n2.getH()) return -1;
             else if (n1.getH() > n2.getH()) return 1;
             return 0;
-        };
-        startingNode.setH(heuristicValues[startingNode.getXCoordinate()][startingNode.getYCoordinate()]);
-        Map<Node, Double> seen = new HashMap<>();
-        PriorityQueue<Node> priorityQueue = new PriorityQueue<>(comparator);
+        });
         seen.put(startingNode, startingNode.getH());
         priorityQueue.add(startingNode);
         toBeColoured.add(startingNode);
@@ -217,15 +243,14 @@ class Grid {
 
             Node currentNode = priorityQueue.remove();
 
-            if (currentNode.equals(goalNode)){
+            if (currentNode.equals(goalNode)) {
                 return;
             }
             for (Node n : getNeighbours(currentNode, allowDiagonal)) {
                 n.setH(heuristicValues[n.getXCoordinate()][n.getYCoordinate()]);
-                if(!seen.containsKey(n) || n.getH() < seen.get(n)) {
+                if (!seen.containsKey(n) || n.getH() < seen.get(n)) {
                     priorityQueue.add(n);
                     seen.put(n, n.getH());
-                    System.out.println(heuristicValues[n.getXCoordinate()][n.getYCoordinate()]);
                     toBeColoured.add(n);
                 }
             }
@@ -237,7 +262,7 @@ class Grid {
     void colourPath() {
         Timeline t = new Timeline();
         for (Node n : toBeColoured) {
-            int DURATION = 1000;
+            int DURATION = 100;
             KeyFrame kf = new KeyFrame(Duration.millis(DURATION * (toBeColoured.indexOf(n) + 1)), event -> {
                 if (n.equals(getGoalNode())) {
                     n.setFill(Color.GREEN);
