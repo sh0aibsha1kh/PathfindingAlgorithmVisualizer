@@ -6,6 +6,7 @@ import javafx.scene.shape.StrokeType;
 class Node extends Rectangle {
 
     private int x, y;
+    private Double h;
 
     Node(int x, int y, int width, int height) {
         super(width, height);
@@ -25,9 +26,12 @@ class Node extends Rectangle {
         return y;
     }
 
-    void setCoordinates(int x, int y) {
-        this.x = x;
-        this.y = y;
+    Double getH() {
+        return h;
+    }
+
+    void setH(Double heuristic) {
+        this.h = heuristic;
     }
 
     @Override
