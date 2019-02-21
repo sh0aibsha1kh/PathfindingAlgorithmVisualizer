@@ -144,6 +144,10 @@ class Grid {
         return neighbours;
     }
 
+    /**
+     * This method runs breadth first search on the current grid in order to find a path from the starting node
+     * to the goal node.
+     */
     void breadthFirstSearch() {
 
         Queue<State> queue = new LinkedList<>();
@@ -179,6 +183,10 @@ class Grid {
         }
     }
 
+    /**
+     * This method runs depth first search on the current grid in order to find a path from the starting node
+     * to the goal node. It goes North first, then Northeast, then East, then ..., and finally Northwest.
+     */
     void depthFirstSearch() {
         Stack<State> stack = new Stack<>();
         State startingState = new State(startingNode, new LinkedList<>());
@@ -207,7 +215,10 @@ class Grid {
         }
     }
 
-
+    /**
+     * This method runs a* search on the current grid in order to find a path from the starting node
+     * to the goal node efficiently.
+     */
     void aStarSearch() {
         PriorityQueue<State> priorityQueue = new PriorityQueue<>((State s1, State s2) -> {
             double s1Cost = calculatePathCost(s1.getPathToNode()) + s1.getNode().getH();
