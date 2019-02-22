@@ -240,6 +240,7 @@ class Grid {
             if (calculatePathCost(currentState.getPathToNode()) <= seen.get(currentState.getNode())) {
 //
                 if (currentState.getNode().equals(goalNode)) {
+                    colourFinalPath(currentState.getPathToNode());
                     return;
                 }
             }
@@ -268,12 +269,32 @@ class Grid {
             int SPEED = 50;
             KeyFrame kf = new KeyFrame(Duration.millis(SPEED * (toBeColoured.indexOf(n) + 1)), event -> {
                 if (n.equals(getGoalNode())) {
-                    n.setFill(Color.GREEN);
+//                    n.setFill(Color.GREEN);
                     t.stop();
                     return;
                 }
                 if (!n.equals(getStartingNode())) {
                     n.setFill(Color.ORANGE);
+                }
+            });
+
+            t.getKeyFrames().add(kf);
+        }
+        t.play();
+    }
+
+    void colourFinalPath(List<Node> finalPath) {
+        Timeline t = new Timeline();
+        for (Node n : finalPath) {
+            int SPEED = 100;
+            KeyFrame kf = new KeyFrame(Duration.millis(SPEED * (toBeColoured.indexOf(n) + 1)), event -> {
+                if (n.equals(getGoalNode())) {
+                    n.setFill(Color.GREEN);
+                    t.stop();
+                    return;
+                }
+                if (!n.equals(getStartingNode())) {
+                    n.setFill(Color.SKYBLUE);
                 }
             });
 
