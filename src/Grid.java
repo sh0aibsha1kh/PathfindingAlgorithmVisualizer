@@ -219,7 +219,7 @@ class Grid {
      * This method runs a* search on the current grid in order to find a path from the starting node
      * to the goal node efficiently.
      */
-    void aStarSearch() {
+    List<Node> aStarSearch() {
         PriorityQueue<State> priorityQueue = new PriorityQueue<>((State s1, State s2) -> {
             double s1Cost = calculatePathCost(s1.getPathToNode()) + s1.getNode().getH();
             double s2Cost = calculatePathCost(s2.getPathToNode()) + s2.getNode().getH();
@@ -240,8 +240,8 @@ class Grid {
             if (calculatePathCost(currentState.getPathToNode()) <= seen.get(currentState.getNode())) {
 //
                 if (currentState.getNode().equals(goalNode)) {
-                    colourFinalPath(currentState.getPathToNode());
-                    return;
+//                    colourFinalPath(currentState.getPathToNode());
+                    return currentState.getPathToNode();
                 }
             }
 
@@ -261,12 +261,13 @@ class Grid {
                 }
             }
         }
+        return null;
     }
 
     void colourPath() {
         Timeline t = new Timeline();
         for (Node n : toBeColoured) {
-            int SPEED = 50;
+            int SPEED = 10;
             KeyFrame kf = new KeyFrame(Duration.millis(SPEED * (toBeColoured.indexOf(n) + 1)), event -> {
                 if (n.equals(getGoalNode())) {
 //                    n.setFill(Color.GREEN);
@@ -286,7 +287,7 @@ class Grid {
     void colourFinalPath(List<Node> finalPath) {
         Timeline t = new Timeline();
         for (Node n : finalPath) {
-            int SPEED = 100;
+            int SPEED = 25;
             KeyFrame kf = new KeyFrame(Duration.millis(SPEED * (toBeColoured.indexOf(n) + 1)), event -> {
                 if (n.equals(getGoalNode())) {
                     n.setFill(Color.GREEN);

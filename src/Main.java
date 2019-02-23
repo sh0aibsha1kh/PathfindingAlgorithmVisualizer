@@ -18,9 +18,7 @@ public class Main extends Application {
 
         attachGrid(gridPane, grid);
         grid.createObstacleNodes();
-
-        grid.aStarSearch();
-        grid.colourPath();
+        grid.colourFinalPath(grid.aStarSearch());
 
         Scene scene = new Scene(gridPane, 1000, 500);
 
