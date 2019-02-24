@@ -238,9 +238,7 @@ class Grid {
             State currentState = priorityQueue.remove();
 
             if (calculatePathCost(currentState.getPathToNode()) <= seen.get(currentState.getNode())) {
-//
                 if (currentState.getNode().equals(goalNode)) {
-//                    colourFinalPath(currentState.getPathToNode());
                     return currentState.getPathToNode();
                 }
             }
@@ -270,7 +268,7 @@ class Grid {
             int SPEED = 10;
             KeyFrame kf = new KeyFrame(Duration.millis(SPEED * (toBeColoured.indexOf(n) + 1)), event -> {
                 if (n.equals(getGoalNode())) {
-//                    n.setFill(Color.GREEN);
+                    n.setFill(Color.GREEN);
                     t.stop();
                     return;
                 }
@@ -295,7 +293,7 @@ class Grid {
                     return;
                 }
                 if (!n.equals(getStartingNode())) {
-                    n.setFill(Color.SKYBLUE);
+                    n.setFill(Color.ORANGE);
                 }
             });
 
@@ -338,6 +336,9 @@ class Grid {
         }
     }
 
+    /**
+     * Generate the heuristic values for all of the nodes in the grid.
+     */
     private void createHeuristicValues() {
         for (int row = 0; row < numberOfRows; row++) {
             for (int col = 0; col < numberOfColumns; col++) {
@@ -353,11 +354,25 @@ class Grid {
         }
     }
 
+    /**
+     * Return the Euclidean distance between two nodes
+     *
+     * @param currentNode the current node
+     * @param goalNode the goal node
+     * @return a Double value representing the Euclidean distance
+     */
     private double euclideanDistance(Node currentNode, Node goalNode) {
         return Math.sqrt(Math.pow(goalNode.getXCoordinate() - currentNode.getXCoordinate(), 2)
                 + Math.pow(goalNode.getYCoordinate() - currentNode.getYCoordinate(), 2));
     }
 
+    /**
+     * Return the Manhattan distance between two nodes
+     *
+     * @param currentNode the current node
+     * @param goalNode the goal node
+     * @return a Double value representing the Manhattan distance
+     */
     private double manhattanDistance(Node currentNode, Node goalNode) {
         return Math.abs(goalNode.getXCoordinate() - currentNode.getXCoordinate())
                 + Math.abs(goalNode.getYCoordinate() - currentNode.getYCoordinate());

@@ -3,6 +3,8 @@ import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
+import java.util.List;
+
 
 public class Main extends Application {
 
@@ -12,17 +14,19 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+
         GridPane gridPane = new GridPane();
 
         Grid grid = new Grid(25, 50, 20, 20, false);
 
         attachGrid(gridPane, grid);
         grid.createObstacleNodes();
-        grid.colourFinalPath(grid.aStarSearch());
+        List<Node> pathToNode = grid.aStarSearch();
+        grid.colourFinalPath(pathToNode);
 
         Scene scene = new Scene(gridPane, 1000, 500);
 
-        primaryStage.setTitle("Grid");
+        primaryStage.setTitle("Pathfinding Algorithm Visualizer");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
